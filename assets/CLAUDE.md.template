@@ -1,0 +1,134 @@
+# {{ vault_name }} — Vault Schema
+
+This is an LLM-maintained knowledge vault for **{{ domain }}** work, scoped at the **{{ scope | replace('_', ' ') }}** level. Any agent (Claude Code, Claude.ai, or another LLM) operating in this directory MUST read this file first and follow the conventions below.
+
+Bootstrapped {{ created_at }} by `vault-scaffold`.
+
+---
+
+## Default behavior
+
+On **any substantive question** about this project — anything that involves prior decisions, conventions, entities, or accumulated context — your first action is:
+
+1. Read `vault/index.md` (the catalog of every page in this vault).
+2. Read the specific pages the index points you to (under `vault/<category>/`).
+3. Only fall back to grepping `raw/` or the surrounding repo when the vault is silent.
+
+{% if domain_default_behavior_rules %}
+Additional rules for **{{ domain }}** vaults:
+
+{% for rule in domain_default_behavior_rules %}
+- {{ rule }}
+{% endfor %}
+
+{% endif %}
+Before performing any **write action** (ingest, file-back, capture-decision), re-read the **Operational notes** section immediately below — it contains user-imposed constraints that override defaults.
+
+If you answer a substantive question and the answer is *not yet* in the vault, propose filing it back (see the `file-back` skill). The vault is a compounding artifact — every good answer should make the next one cheaper.
+
+---
+
+## Operational notes
+
+{{ custom_notes if custom_notes else "_(none — the user has not added any operational constraints.)_" }}
+
+These are user-imposed constraints on how this vault is used. **Honor them on every write.** If a constraint here contradicts a workflow step in a skill, the constraint wins; surface the conflict to the user rather than silently violating either.
+
+---
+
+## Read order
+
+1. **`CLAUDE.md`** (this file) — schema, operational notes, conventions
+2. **`vault/index.md`** — catalog of every page, grouped by category
+3. **`vault/log.md`** — recent ingests, queries, lints, decisions (the last ~20 entries are usually enough)
+4. **`vault/<category>/<page>.md`** — the actual content
+5. **`raw/<source>`** — original source documents, only when a page cites them
+
+Stop once you have enough context. Reading the whole vault is rarely correct.
+
+---
+
+## Folder map
+
+```
+.
+├── CLAUDE.md                  ← this file
+├── README.md                  ← human-facing entry point
+├── .gitignore
+├── raw/                       ← immutable source documents
+│   └── assets/                ← images and binaries referenced by raw/
+├── vault/                     ← LLM-curated wiki
+│   ├── index.md               ← page catalog (read first)
+│   ├── log.md                 ← append-only journal
+│   ├── .scaffold-config.json  ← config snapshot; do not edit
+{% for cat in categories %}│   {% if loop.last %}└──{% else %}├──{% endif %} {{ cat }}/
+{% endfor %}└── .claude/skills/            ← skills that operate on this vault
+    ├── ingest/
+    ├── query/
+    ├── lint/
+    ├── capture-decision/
+    └── file-back/
+```
+
+---
+
+## Page categories
+
+This vault tracks the following kinds of pages:
+
+{% for cat in categories %}- **`vault/{{ cat }}/`** — {{ category_descriptions[cat] }}
+{% endfor %}
+
+Every page lives under exactly one category. If a page seems to span two, it usually wants to be split, or one category needs to absorb the other — flag it during `lint`.
+
+Note: `vault/sources/` is load-bearing — the `ingest` skill always files source summaries there. The schema guarantees the `sources` category exists; do not remove it.
+
+---
+
+## Page conventions
+
+- **Filenames** are lower-kebab-case: `payment-retry-policy.md`, not `PaymentRetryPolicy.md`.
+- **Every page starts with an H1** that matches its display title in `vault/index.md`.
+- **Citations** to source material use relative links into `raw/`: from `vault/<cat>/page.md`, that's `[ACME RFC 7](../../raw/rfc-7.md)`.
+- **Cross-references** between pages use relative links: from one category to another, `[retry policy](../decisions/payment-retry-policy.md)`.
+- **Frontmatter is optional.** When present, use: `created`, `updated`, `sources` (list of `raw/` paths), `related` (list of page paths).
+
+---
+
+## Skills
+
+The vault ships with five skills under `.claude/skills/`:
+
+- `ingest` — pull a new source into the vault
+- `query` — answer a question using the vault, optionally file the answer back
+- `lint` — periodic health check
+- `capture-decision` — record a decision the moment it surfaces in conversation (fires PROACTIVELY)
+- `file-back` — promote chat content into a vault page
+
+See each skill's `SKILL.md` for the full workflow.
+
+### Common invocations
+
+Trigger phrases that activate each skill (close paraphrases also work):
+
+{% for skill, examples in trigger_examples.items() %}- **`{{ skill }}`** — {% for ex in examples %}"{{ ex }}"{% if not loop.last %}, {% endif %}{% endfor +%}
+{% endfor %}
+
+---
+
+## Ingest mode
+
+Default interaction style for the `ingest` skill: **{{ ingest_mode | replace('_', ' ') }}**
+{% if ingest_mode == 'confirm_each_step' %}— pause for the user's OK after every step (read → summarize → file → cross-reference → index → log).
+{% elif ingest_mode == 'confirm_plan' %}— present the full plan once, then execute end-to-end after a single approval.
+{% else %}— run the full pipeline without prompting; show a summary at the end.
+{% endif %}
+The user can override per invocation by saying "step by step" or "just do it."
+{% if domain_custom_additions %}
+
+---
+
+## Domain-specific conventions ({{ domain }})
+
+{{ domain_custom_additions }}
+{% endif %}

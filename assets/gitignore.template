@@ -1,0 +1,11 @@
+# vault-scaffold defaults — safe to extend below, don't remove unless you know what you're doing
+.DS_Store
+Thumbs.db
+.claude/cache/
+__pycache__/
+*.pyc
+.env
+.env.local
+
+## User-specific
+# Add per-user ignores below (editor scratch files, local notes, etc.).

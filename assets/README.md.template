@@ -1,0 +1,54 @@
+# {{ vault_name }}
+
+An LLM-maintained knowledge vault for **{{ domain }}** work, scoped to **{{ scope | replace('_', ' ') }}**. Bootstrapped {{ created_at }}.
+
+## What is this folder?
+
+A persistent, compounding knowledge base of markdown pages. Sources live under `raw/` (immutable). LLM-generated summaries, decisions, concept pages, and runbooks live under `vault/`. The vault is read and maintained primarily by Claude (or another LLM) following the schema in `CLAUDE.md`. Humans curate the sources and ask the questions; the LLM does the summarizing, cross-referencing, and bookkeeping.
+
+This is **not** a docs site. It is not meant to be browsed by every team member. Think of it as a notes directory the LLM keeps for itself (and for you, when you need to ask it something).
+
+## Where things live
+
+```
+.
+├── CLAUDE.md       ← the schema. Read first if you're the LLM.
+├── README.md       ← this file.
+├── .gitignore
+├── raw/            ← source documents. Immutable.
+├── vault/          ← LLM-curated wiki:
+│   ├── index.md    ← page catalog. Read first if you're answering a question.
+│   ├── log.md      ← append-only journal of ingests / queries / lints / decisions.
+{% for cat in categories %}│   ├── {{ cat }}/
+{% endfor %}└── .claude/skills/ ← skills that operate on this vault.
+```
+
+## How Claude uses it
+
+On any substantive question, Claude reads `vault/index.md` first, then drills into the specific pages it points to. If the answer requires new synthesis, Claude proposes filing it back as a new page (see `.claude/skills/file-back/`). When a new source comes in, Claude runs `ingest`. Periodically, `lint` catches contradictions and orphans. When a decision surfaces in conversation, `capture-decision` fires proactively.
+
+The full conventions are in `CLAUDE.md`.
+
+## Ingesting a first source
+
+You have two options:
+
+1. **Tell Claude.** Say "ingest <path-or-url>" or "add this article to the vault". The `ingest` skill walks the 6-step pipeline (read → summarize → file → cross-reference → index → log).
+2. **Drop a file in `raw/` yourself.** Then ask Claude to "summarize the new file in `raw/`". This skips the fetch step.
+
+Either way, the source ends up in `raw/`, a summary page ends up in `vault/sources/`, the index gets updated, and the log gets an entry.
+
+## Modifying the schema
+
+`CLAUDE.md` is the source of truth for how this vault is organized. Edit it freely — Claude will pick up changes on the next read. Common edits:
+
+- **Add a category.** Add it to the "Page categories" list AND create `vault/<new-category>/`. Then add a section to `vault/index.md`.
+- **Remove a category.** Move or archive existing pages first; run `lint` to find orphans; remove the section from `vault/index.md` last. (Note: `sources` is required by the scaffolder's schema and should not be removed.)
+- **Change the read order.** Edit the "Read order" section. Be aware that Claude treats it as authoritative.
+- **Change interaction defaults.** Edit the "Ingest mode" section.
+
+Avoid editing pages under `vault/` directly unless you're correcting an LLM error. The skills are designed to make these edits — using them keeps `vault/index.md` and `vault/log.md` in sync.
+
+## Provenance
+
+Scaffolded by `vault-scaffold` on {{ created_at }}. The original config is preserved at `vault/.scaffold-config.json` for reproducibility.

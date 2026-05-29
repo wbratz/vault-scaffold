@@ -1,0 +1,22 @@
+# {{ vault_name }} — Index
+
+_The catalog of every page in this vault. Read this first._
+
+{% for cat in categories %}
+## {{ cat }}
+
+_{{ category_descriptions[cat] }}_
+
+_No entries yet._
+
+{% endfor %}
+---
+
+## How to use this index
+
+- **Reading order:** find the category that matches your question, scan the one-line summaries, open the pages that look relevant.
+- **Entry format:** under each category, entries are listed as `- [Title](<category>/<slug>.md) — one-line summary`. Paths are relative to this file (`vault/index.md`).
+- **Adding entries:** the `ingest`, `capture-decision`, and `file-back` skills update this file automatically. You should rarely edit it by hand.
+- **Empty categories:** a category with no entries is a hint to either ingest sources in that area or remove the category from the schema during the next `lint`.
+
+If this index ever drifts from the contents of `vault/`, run the `lint` skill — it will flag orphans and missing entries.

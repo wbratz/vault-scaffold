@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/vault-scaffold/schema/v0.1.0/config.json",
+  "title": "VaultScaffoldConfig",
+  "description": "Configuration contract produced by the vault-scaffold interview and consumed by scripts/scaffold.py. Defines a single vault to be generated.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "vault_name",
+    "target_path",
+    "domain",
+    "scope",
+    "audience",
+    "categories",
+    "seed_artifacts",
+    "ingest_mode",
+    "custom_notes",
+    "created_at",
+    "scaffold_version"
+  ],
+  "properties": {
+    "vault_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Human-readable name of the vault. Used in generated README.md and CLAUDE.md headers."
+    },
+    "target_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Absolute filesystem path where the vault will be scaffolded. Must be absolute (POSIX '/...' or Windows 'X:\\...' / 'X:/...')."
+    },
+    "domain": {
+      "type": "string",
+      "enum": ["engineering", "product", "research", "personal", "team", "mixed"],
+      "description": "Primary subject domain of the vault. Drives which domain template (references/domain-templates.md) seeds the schema."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["single_repo", "single_project", "cross_project", "personal"],
+      "description": "Breadth of the vault. Determines folder layout (e.g., per-repo subdirs vs. flat) and ingest defaults."
+    },
+    "audience": {
+      "type": "string",
+      "enum": ["solo", "small_team", "large_team", "mixed"],
+      "description": "Who will read and maintain the vault. Influences tone, formality, and review/lint cadence in generated skills."
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[a-z][a-z0-9_-]*$"
+      },
+      "contains": { "const": "sources" },
+      "description": "Page categories the vault will track (e.g., 'concepts', 'decisions', 'entities', 'sources'). MUST include 'sources' — the ingest skill writes summaries into pages/sources/ and will silently break without it. Other categories are user-chosen and seed the initial index.md sections."
+    },
+    "seed_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Optional list of paths or URLs to ingest as the first sources. Empty array means start with an empty raw/ directory."
+    },
+    "ingest_mode": {
+      "type": "string",
+      "enum": ["confirm_each_step", "confirm_plan", "autonomous"],
+      "description": "Default interaction style for the generated ingest skill. 'confirm_each_step' prompts per page; 'confirm_plan' shows the plan once; 'autonomous' runs end-to-end."
+    },
+    "custom_notes": {
+      "type": "string",
+      "description": "Free-form notes captured during the interview. Appended verbatim to CLAUDE.md under a 'User Notes' section. Empty string allowed."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp (with timezone) marking when the config was produced."
+    },
+    "scaffold_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$",
+      "description": "Semver version of the scaffolder that produced this config. Persisted into the vault for forward-compat checks."
+    }
+  }
+}

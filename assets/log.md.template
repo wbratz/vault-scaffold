@@ -1,0 +1,7 @@
+# {{ vault_name }} — Log
+
+_Append-only journal of every operation against this vault. Newest entries at the top. Format: `## [<ISO date>] <op> | <subject>`._
+
+## [{{ created_at }}] init | vault bootstrapped
+
+Vault scaffolded by `vault-scaffold` for **{{ domain }}** work at **{{ scope | replace('_', ' ') }}** scope. Categories: {% for cat in categories %}`{{ cat }}`{% if not loop.last %}, {% endif %}{% endfor %}. Default ingest mode: `{{ ingest_mode | replace('_', ' ') }}`.
