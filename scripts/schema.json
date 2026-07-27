@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/vault-scaffold/schema/v0.1.0/config.json",
+  "$id": "https://github.com/vault-scaffold/schema/v0.1.1/config.json",
   "title": "VaultScaffoldConfig",
   "description": "Configuration contract produced by the vault-scaffold interview and consumed by scripts/scaffold.py. Defines a single vault to be generated.",
   "type": "object",

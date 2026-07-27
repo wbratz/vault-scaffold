@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "vault-scaffold",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scaffolds an LLM-maintained \"vault\" knowledge base — a persistent, markdown-based directory that Claude curates, queries, and grows over time. Based on Karpathy's LLM Wiki pattern. Runs a short interview, validates the answers, and lays out a ready-to-use vault with schema, indices, companion skills, and an initial git commit.",
   "author": {
     "name": "Billy Bratz",

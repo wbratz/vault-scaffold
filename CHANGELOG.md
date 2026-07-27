@@ -10,7 +10,7 @@ Iteration markers in parentheses refer to the development session that produced 
 
 ### Fixed
 
-- README install section corrected. `claude skills install <pkg>.skill` is not a real Claude Code CLI subcommand at any current version. Replaced with the three options that actually work today: `/plugin install <owner>/<repo>` from a public GitHub repo (canonical), direct `git clone` into `~/.claude/skills/` or `.claude/skills/`, and `unzip` of the built `.skill` package. Added an explicit *"restart Claude Code after install"* note.
+- README install section corrected. `claude skills install <pkg>.skill` is not a real Claude Code CLI subcommand. Direct clone and `.skill` extraction remain supported; marketplace installation is documented in the 0.1.1 release notes.
 
 - **Python invocation portability.** SKILL.md previously hardcoded `python` for invoking `scripts/scaffold.py`, which fails on systems where the binary is `python3` (modern macOS) or `py` (Windows-only py launcher). SKILL.md now probes for `python3`, `py -3`, then `python` in order, using the first that reports Python 3.9+. `scripts/scaffold.py` gained a top-level version guard so an unsupported interpreter exits 1 with a clear actionable message instead of a cryptic `SyntaxError` or `ImportError`. Added a `#!/usr/bin/env python3` shebang.
 
@@ -19,6 +19,18 @@ Iteration markers in parentheses refer to the development session that produced 
 - New "Where this runs" section in README clarifying that `vault-scaffold` is CLI-first: generated vaults live on the user's real filesystem and are meant to be opened in subsequent CLI sessions. The desktop app installs the skill fine but scaffolds into its sandboxed VM, so vaults created there don't persist between sessions — useful for demos, not for vaults the user wants to keep.
 
 - README dependency floor corrected from Python 3.10 to Python 3.9 (the actual minimum, thanks to `from __future__ import annotations` deferring all type-hint syntax to strings). Added explicit `python3 -m pip install` vs `py -3 -m pip install` guidance for macOS/Linux vs Windows.
+
+---
+
+## [0.1.1] — 2026-07-27
+
+### Fixed
+
+- Added a root `.claude-plugin/marketplace.json`, making the public GitHub repository installable through Claude Code's supported two-step marketplace flow.
+- Replaced the invalid `/plugin install <owner>/<repo>` documentation with `/plugin marketplace add wbratz/vault-scaffold` followed by `/plugin install vault-scaffold@wbratz-vault-tools`.
+- Documented the non-plugin path explicitly: `SKILL.md` remains a portable interview and execution contract for any local file-reading agent that can run the scaffolder.
+- Removed domain-example placeholders from generated query-skill metadata so stricter cross-agent skill validators accept every scaffolded skill.
+- Confirmed the scaffold and git initialization flow on macOS.
 
 ---
 

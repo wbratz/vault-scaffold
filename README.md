@@ -1,6 +1,6 @@
 # vault-scaffold
 
-**A Claude Code skill that scaffolds LLM-maintained "vault" knowledge bases.**
+**An interview-driven agent skill that scaffolds LLM-maintained "vault" knowledge bases.**
 
 Based on [Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern: a persistent, markdown-based knowledge directory that an LLM curates, queries, and grows over time. Instead of re-deriving answers from raw sources on every query (RAG-style), the vault is a compounding artifact where summaries, decisions, entity pages, and syntheses accumulate.
 
@@ -10,30 +10,36 @@ Based on [Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893
 
 ## Install
 
-`vault-scaffold` is a Claude Code skill — install it where Claude Code will discover it. Three current options, listed in the order you should reach for them.
+The workflow is plain Markdown plus a Python scaffolder. The marketplace is the easiest installation path for Claude Code, but the skill can also be cloned directly or read as standalone agent instructions.
 
-### a) Via `/plugin install` from a public GitHub repo (canonical, once published)
+### a) Claude Code marketplace
 
-In any Claude Code session:
+Add the personal marketplace once:
 
 ```
-/plugin install <owner>/vault-scaffold
+/plugin marketplace add wbratz/vault-scaffold
 ```
 
-This is the path most users will expect — Claude Code's plugin/skill ecosystem standardizes on `/plugin install` from a GitHub repo or marketplace. Use this once your fork or our official repo is public.
+Then install the plugin:
 
-### b) Direct git clone (works today, no marketplace dependency)
+```
+/plugin install vault-scaffold@wbratz-vault-tools
+```
+
+Run `/reload-plugins` to make it available in the current session.
+
+### b) Direct git clone
 
 User-global — skill becomes available in every Claude Code session on your machine:
 
 ```bash
-git clone https://github.com/<owner>/vault-scaffold.git ~/.claude/skills/vault-scaffold
+git clone https://github.com/wbratz/vault-scaffold.git ~/.claude/skills/vault-scaffold
 ```
 
 Project-scoped — only loads when Claude Code starts in this project's root:
 
 ```bash
-git clone https://github.com/<owner>/vault-scaffold.git .claude/skills/vault-scaffold
+git clone https://github.com/wbratz/vault-scaffold.git .claude/skills/vault-scaffold
 ```
 
 Update later with `git -C <path> pull`.
@@ -43,14 +49,18 @@ Update later with `git -C <path> pull`.
 Build one with `python scripts/package.py` (output lands in `dist/`), or download a release. The `.skill` file is just a zip:
 
 ```bash
-unzip vault-scaffold-v0.1.0.skill -d ~/.claude/skills/
+unzip vault-scaffold-v0.1.1.skill -d ~/.claude/skills/
 # verify SKILL.md ends up one level deep, not nested:
 ls ~/.claude/skills/vault-scaffold/SKILL.md
 ```
 
 ### After install
 
-**Restart Claude Code** so the skill loader picks up the new skill. Then test it in a fresh session by saying something like *"set up a vault for my Python project"* — the trigger phrase should fire the interview.
+If you used the marketplace, run `/reload-plugins`. For a direct clone or `.skill` extraction, restart Claude Code. Then say something like *"set up a vault for my Python project"* — the trigger phrase should fire the interview.
+
+### Other agents
+
+`SKILL.md` is the complete interview and execution contract. Agents that can read local instructions and run Python can follow it without the Claude plugin system. The generated `CLAUDE.md` explicitly addresses any file-reading agent; the `.claude/skills/` directory adds automatic operation detection when Claude Code is the client.
 
 ### Runtime dependencies
 

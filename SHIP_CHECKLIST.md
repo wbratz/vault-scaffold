@@ -14,7 +14,7 @@ Run through this before tagging a public release. Items are grouped roughly by *
 
 ## Cross-platform
 
-- [ ] Tested on **macOS** (developer's primary platform during build was Windows). Confirm `pathlib`, `subprocess`, and the git invocation behave identically.
+- [x] Tested on **macOS**. Confirmed `pathlib`, `subprocess`, template rendering, and git initialization behave correctly.
 - [ ] Tested on **Linux** (likely CI / cloud machines).
 - [ ] Any path comparison in tests uses `Path` not string equality so trailing slashes / case sensitivity don't trip you.
 - [ ] No use of `/tmp` in code or default configs — system temp via `os.environ['TEMP']` / `tempfile.gettempdir()` only.
@@ -53,7 +53,7 @@ Run through this before tagging a public release. Items are grouped roughly by *
 - [ ] `.gitignore` excludes `dist/`, `__pycache__/`, `.pytest_cache/`, `.venv/`, `.env`.
 - [ ] No secrets, tokens, or personal data in any file or git history.
 - [ ] Repo description on the hosting platform (GitHub etc.) matches the README opening paragraph.
-- [ ] Tag the release commit: `git tag -a v0.1.0 -m "vault-scaffold v0.1.0"`.
+- [ ] Tag the release commit: `git tag -a v0.1.1 -m "vault-scaffold v0.1.1"`.
 
 ## Package
 

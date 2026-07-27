@@ -123,7 +123,7 @@ Beyond the per-phase rules above, the interview must handle these mid-flow cases
      "ingest_mode":      "<Q6>",
      "custom_notes":     "<Q7 or empty string>",
      "created_at":       "<ISO 8601 with timezone, e.g. 2026-05-28T14:00:00-04:00>",
-     "scaffold_version": "0.1.0"
+     "scaffold_version": "0.1.1"
    }
    ```
 

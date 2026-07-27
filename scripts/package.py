@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 
 # Files / directories that go into the package (paths are relative to ROOT).

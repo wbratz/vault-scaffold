@@ -1,8 +1,10 @@
 ---
 name: query
 description: >-
-  Answer a question using the {{ vault_name }} vault, citing sources, and propose filing the answer back when it would compound. Use when the user says things like:
-  {%+ for ex in trigger_examples.query %}"{{ ex }}"{% if not loop.last %}, {% endif %}{% endfor %}.
+  Answer questions from the {{ vault_name }} vault with citations and propose
+  filing valuable syntheses back into the vault. Use when the user asks what
+  the vault knows, requests a grounded lookup, or asks a substantive question
+  about this vault's domain.
 ---
 
 # query

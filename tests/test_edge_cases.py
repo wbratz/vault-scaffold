@@ -66,7 +66,7 @@ def _make_config(categories: list[str]) -> dict:
         "ingest_mode": "autonomous",
         "custom_notes": "",
         "created_at": "2026-05-28T00:00:00-04:00",
-        "scaffold_version": "0.1.0",
+        "scaffold_version": "0.1.1",
     }
 
 

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "wbratz-vault-tools",
+  "owner": {
+    "name": "Billy Bratz",
+    "url": "https://github.com/wbratz"
+  },
+  "metadata": {
+    "description": "Personal tools for building persistent, agent-maintained knowledge vaults."
+  },
+  "plugins": [
+    {
+      "name": "vault-scaffold",
+      "source": "./",
+      "description": "Interview the user and scaffold a source-grounded, LLM-maintained knowledge vault.",
+      "version": "0.1.1",
+      "category": "productivity",
+      "tags": [
+        "knowledge-base",
+        "llm-wiki",
+        "scaffold",
+        "vault"
+      ]
+    }
+  ]
+}
