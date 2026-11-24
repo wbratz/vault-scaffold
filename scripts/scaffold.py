@@ -625,7 +625,7 @@ def init_git(
         if verbose:
             print("  no files staged or committed; review content before any Git publication")
     except FileNotFoundError:
-        sys.stderr.write("warning: 'git' not found in PATH; skipping git init/commit\n")
+        sys.stderr.write("warning: 'git' not found in PATH; skipping git init\n")
     except subprocess.CalledProcessError as exc:
         sys.stderr.write(f"warning: git operation failed: {exc}\n")
 

@@ -126,7 +126,7 @@ Claude: [runs scripts/scaffold.py, streams output]
           target:     /abs/path/acme-payments
           domain:     engineering
           ...
-          files:      17
+          files:      24
 ```
 
 After scaffolding, open `ADOPTION.md` in the new vault. Ingest one allowed source, ask a real question, and use `review-answer` to inspect the answer against Raw. The index routes the agent to pages; it checks the source behind substantive conclusions and proposes filing back reusable synthesis.
@@ -164,7 +164,6 @@ Semantic versioning. The version is recorded in:
 
 - `scripts/package.py` (`VERSION`)
 - Every scaffolded vault's `vault/.scaffold-config.json` (under `scaffold_version`)
-- Generated vault config snapshots for upgrade compatibility
 - Filename of the built `.skill` package
 
 **Bump rules:**
