@@ -24,7 +24,7 @@ The user wants to start a new vault — a directory of markdown that Claude (or 
 
 ## What you'll create
 
-A self-contained directory with a `CLAUDE.md` schema (read first by any agent), a `raw/` folder for source documents, a `vault/` folder of LLM-generated pages with one subfolder per category, an `index.md` catalog, an append-only `log.md`, and five companion skills (`ingest`, `query`, `lint`, `capture-decision`, `file-back`) under `.claude/skills/`. The whole tree is git-initialized with an initial commit.
+A self-contained directory with a `CLAUDE.md` schema, `raw/` evidence, a cited `vault/` wiki, answer review guidance, an optional semantic-layer guide, and six companion skills (`ingest`, `query`, `lint`, `capture-decision`, `file-back`, `review-answer`). Git is initialized when available; no file is staged or committed automatically.
 
 ## Workflow
 
@@ -38,11 +38,15 @@ A self-contained directory with a `CLAUDE.md` schema (read first by any agent), 
    <target>/
    ├── CLAUDE.md       ← schema Claude reads first
    ├── README.md       ← human-facing entry point
+   ├── ADOPTION.md     ← one-domain first run
+   ├── SEMANTIC-LAYER.md ← optional vocabulary-to-graph guide
+   ├── LOCAL-NOTES.md  ← private operating constraints
+   ├── evaluation/     ← answer review guide and local cases
    ├── raw/            ← source documents (immutable)
    ├── vault/          ← LLM-curated wiki
    │   ├── index.md, log.md
    │   └── <category>/ ← one folder per category you choose
-   └── .claude/skills/ ← ingest, query, lint, capture-decision, file-back
+   └── .claude/skills/ ← ingest, query, lint, capture-decision, file-back, review-answer
    ```
 
 3. **Get target path and vault name (one message, two questions).** *"Where should I scaffold it (absolute or relative path), and what should I call the vault?"*
@@ -52,7 +56,7 @@ A self-contained directory with a `CLAUDE.md` schema (read first by any agent), 
 4. **Check the target before going further:**
    - **Doesn't exist** → *"Create `<absolute-path>` and scaffold into it?"* (yes/no).
    - **Exists, empty (or only `.git`)** → proceed silently.
-   - **Exists, has unrelated files, no vault** → *"That directory has existing files. I'll add the vault alongside them and won't overwrite anything by default — OK?"*
+   - **Exists, has unrelated files, no vault** → check for generated-name collisions such as `README.md`, `.gitignore`, `CLAUDE.md`, or `.claude/skills/`. If none exist, add the vault alongside the files. If there is a collision, choose another directory or show the exact files and obtain explicit overlay consent before using `--force`.
    - **Already contains a vault** (both `CLAUDE.md` and `vault/` present) → require explicit overlay consent: *"There's already a vault here. Re-running will overlay the schema, README, and skills (your `raw/` and existing pages are untouched). Type 'force' to confirm."* Accept any case-insensitive match (`force`, `FORCE`, `Force`) or any unambiguous yes like `confirm`, `overwrite`, `go ahead`. Only then pass `--force` to the script in Step 4.
 
 ### Step 2: Conduct the interview
@@ -89,7 +93,7 @@ Three phases. **Ask every question in a given phase in a single turn** — don't
 **Phase 3 — Operating style** (Q6 + Q7 in one turn):
 
 - **Q6 — Ingest interaction style.** *Confirm every write step / Confirm only the plan / Run autonomously.* Maps to `ingest_mode`: `confirm_each_step | confirm_plan | autonomous`.
-- **Q7 — Custom notes** (optional, free text). *"Anything about how your team works that should be baked into the schema? Scope exclusions, naming conventions, things to never auto-ingest. Press enter to skip."* Goes into `custom_notes`; empty string is allowed.
+- **Q7 — Local operating notes** (optional, free text). *"Any sources this agent must not read or send to its model? Any exclusions, naming rules, or edit limits? Please don't paste secrets."* Goes into ignored `LOCAL-NOTES.md` and the local config snapshot via `custom_notes`; empty string is allowed. The scaffold has no automatic privacy scanner.
 
 ### Step 2.5: Interview-handling behaviors
 
@@ -123,11 +127,11 @@ Beyond the per-phase rules above, the interview must handle these mid-flow cases
      "ingest_mode":      "<Q6>",
      "custom_notes":     "<Q7 or empty string>",
      "created_at":       "<ISO 8601 with timezone, e.g. 2026-05-28T14:00:00-04:00>",
-     "scaffold_version": "0.1.1"
+     "scaffold_version": "0.2.0"
    }
    ```
 
-2. **Show the JSON in a fenced code block.** Call out:
+2. **Show the JSON for the owner's review.** Do not put secrets into `custom_notes` or seed URLs. Call out:
    - That `sources` was added if the user didn't list it.
    - The full resolved `target_path` (so the user catches typos before any disk write).
 
@@ -135,7 +139,7 @@ Beyond the per-phase rules above, the interview must handle these mid-flow cases
 
 ### Step 4: Run the scaffold script
 
-1. **Write the config to system temp.** Filename: `vault-scaffold-config-<YYYYMMDD-HHMMSS>.json` (no colons in the timestamp — colons are invalid in Windows filenames). On Linux/macOS use `/tmp/`; on Windows use the value of `$env:TEMP` (or whatever your shell exposes).
+1. **Write the config to system temp.** Filename: `vault-scaffold-config-<YYYYMMDD-HHMMSS>.json` (no colons in the timestamp — colons are invalid in Windows filenames). On Linux/macOS use `/tmp/`; on Windows use the value of `$env:TEMP` (or whatever your shell exposes). Restrict access to the current user where the platform supports it. Remove the temporary copy after the scaffold succeeds; the ignored vault snapshot supports upgrades.
 
 2. **Pick the right Python command first.** The command literally named `python` doesn't exist on every system (e.g., modern macOS has `python3` only). Probe in order, taking the first whose `--version` reports 3.9 or newer:
 
@@ -173,9 +177,9 @@ Beyond the per-phase rules above, the interview must handle these mid-flow cases
 
 1. **Show what got created.** Run a tree listing rooted at `<target>`. Prefer `tree -L 3` if available; otherwise `find <target> -not -path '*/.git/*' | sort` (Linux/macOS) or an equivalent recursive listing on Windows. Render it in a code block.
 
-2. **Offer to ingest a seed artifact.** If Q5 produced any paths/URLs, ask: *"Want to test the flow by ingesting `<first artifact>` now? I'll spawn a one-shot Claude Code session inside the new vault to run it."*
+2. **Offer a first question.** Point to `ADOPTION.md` and suggest one allowed seed source followed by a real question and `review-answer`. Check the source against `LOCAL-NOTES.md` before invoking any agent on it. If the user chose `confirm_each_step`, use an interactive session so the promised pauses are real.
 
-   If yes, run via Bash with a long timeout (ingests can take a couple of minutes):
+   If the source is allowed and the user wants a non-interactive ingest, run via Bash with a long timeout (ingests can take a couple of minutes):
 
    ```bash
    cd "<target>" && claude -p "ingest <first-artifact>"
@@ -184,14 +188,14 @@ Beyond the per-phase rules above, the interview must handle these mid-flow cases
    The child session loads the new vault's `CLAUDE.md` and `.claude/skills/ingest/SKILL.md` automatically (because its CWD is the new vault). Stream the output verbatim. When the child exits, summarize what landed: which file appeared under `raw/`, which page under `vault/sources/`, and what got appended to `vault/index.md` and `vault/log.md`.
 
    **Caveats — mention only if they actually bite:**
-   - The child runs non-interactively (`-p`), so if the user picked `confirm_each_step` for `ingest_mode`, the child cannot pause for confirmations. It will either plow ahead or report that it can't proceed. For a test ingest this is usually fine; if the user wants the full interactive experience, suggest they re-run interactively (`cd "<target>" && claude` then say *"ingest <artifact>"*).
+   - A non-interactive child cannot honor `confirm_each_step`; use an interactive session for that mode.
    - If `claude` isn't on the user's `PATH` or the `-p` flag isn't supported by their version, Bash will fail. Surface the stderr and fall back: tell the user to open a new terminal in `<target>` and run `claude` interactively.
 
    If no, skip and move to the closing message.
 
 3. **Closing.** Keep it short:
 
-   > Open Claude Code in `<target>` and try saying *"what does this project know about X?"* — Claude will read `vault/index.md` automatically and answer (or admit the vault is silent and offer to ingest something). The five skills under `.claude/skills/` activate on their own triggers; `capture-decision` will fire proactively whenever a decision surfaces in conversation.
+   > Open Claude Code in `<target>` and follow `ADOPTION.md`: ingest one allowed source, ask a real question, then review the answer. The six skills under `.claude/skills/` cover that loop. Git has no staged files or initial commit; review content before any remote publication.
 
 ## Behavior rules
 
@@ -205,7 +209,7 @@ Beyond the per-phase rules above, the interview must handle these mid-flow cases
 ## Failure modes to watch for
 
 - **`jsonschema` or `jinja2` not installed.** The script will exit during import. Surface the install hint: `pip install 'jsonschema>=4.0' 'jinja2>=3.0'`.
-- **`git` not in PATH.** The scaffold still succeeds and the script prints a warning. Tell the user how to commit manually: `cd <target> && git init && git add . && git commit -m "initial scaffold"`.
+- **`git` not in PATH.** The scaffold still succeeds. Git is optional; if the user later wants a remote backup, review the exact files and destination before staging anything. The ignored Raw, wiki, local notes, and evaluation cases require a deliberate export process.
 - **User picks zero categories.** The schema requires at least one. Push back: *"You need at least one category — usually 3-4 to start. Want the defaults for `<domain>`?"*
 - **Target on a read-only filesystem or permission-denied path.** The script exits with code 3 and a clear error; relay it and ask for a writable target.
 - **User's `target_path` has a typo and resolves to an unexpected place.** This is exactly why Step 3 shows the resolved absolute path. If you skip that step, the user can wipe the wrong directory with `--force`. Don't skip it.

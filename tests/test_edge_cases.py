@@ -155,3 +155,13 @@ def test_check_target_allows_existing_vault_with_force(tmp_path: Path) -> None:
 def test_check_target_allows_dir_with_unrelated_files(tmp_path: Path) -> None:
     (tmp_path / "some-other-file.txt").write_text("hi", encoding="utf-8")
     check_target(tmp_path, force=False)  # should not raise
+
+
+@pytest.mark.parametrize("relative_path", ["README.md", ".gitignore", "evaluation/README.md", ".claude/skills/query/SKILL.md"])
+def test_check_target_refuses_generated_file_collision(tmp_path: Path, relative_path: str) -> None:
+    existing = tmp_path / relative_path
+    existing.parent.mkdir(parents=True, exist_ok=True)
+    existing.write_text("owner content", encoding="utf-8")
+    with pytest.raises(ScaffoldError, match="would replace"):
+        check_target(tmp_path, force=False)
+    assert existing.read_text(encoding="utf-8") == "owner content"

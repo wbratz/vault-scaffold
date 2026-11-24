@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/vault-scaffold/schema/v0.1.1/config.json",
+  "$id": "https://github.com/vault-scaffold/schema/v0.2.0/config.json",
   "title": "VaultScaffoldConfig",
   "description": "Configuration contract produced by the vault-scaffold interview and consumed by scripts/scaffold.py. Defines a single vault to be generated.",
   "type": "object",
@@ -38,12 +38,12 @@
     "scope": {
       "type": "string",
       "enum": ["single_repo", "single_project", "cross_project", "personal"],
-      "description": "Breadth of the vault. Determines folder layout (e.g., per-repo subdirs vs. flat) and ingest defaults."
+      "description": "Breadth of the vault. Appears in generated guidance; the starter uses the same folder layout for every scope."
     },
     "audience": {
       "type": "string",
       "enum": ["solo", "small_team", "large_team", "mixed"],
-      "description": "Who will read and maintain the vault. Influences tone, formality, and review/lint cadence in generated skills."
+      "description": "Who will read and maintain the vault. Recorded for the owner; the starter does not alter its workflows by audience."
     },
     "categories": {
       "type": "array",
@@ -55,7 +55,7 @@
         "pattern": "^[a-z][a-z0-9_-]*$"
       },
       "contains": { "const": "sources" },
-      "description": "Page categories the vault will track (e.g., 'concepts', 'decisions', 'entities', 'sources'). MUST include 'sources' — the ingest skill writes summaries into pages/sources/ and will silently break without it. Other categories are user-chosen and seed the initial index.md sections."
+      "description": "Page categories the vault will track (e.g., 'concepts', 'decisions', 'entities', 'sources'). MUST include 'sources' because ingest writes summaries into vault/sources/. Other categories seed index.md sections."
     },
     "seed_artifacts": {
       "type": "array",
@@ -63,7 +63,7 @@
         "type": "string",
         "minLength": 1
       },
-      "description": "Optional list of paths or URLs to ingest as the first sources. Empty array means start with an empty raw/ directory."
+      "description": "Optional paths or URLs offered for later ingest after source-access review. The scaffold does not ingest them automatically."
     },
     "ingest_mode": {
       "type": "string",
@@ -72,7 +72,7 @@
     },
     "custom_notes": {
       "type": "string",
-      "description": "Free-form notes captured during the interview. Appended verbatim to CLAUDE.md under a 'User Notes' section. Empty string allowed."
+      "description": "Free-form local operating notes. Written to ignored LOCAL-NOTES.md and the ignored config snapshot, not to CLAUDE.md. Do not include secrets; an agent may read these notes. Empty string allowed."
     },
     "created_at": {
       "type": "string",

@@ -1,20 +1,20 @@
 ---
 name: capture-decision
 description: >-
-  Use this skill PROACTIVELY whenever a decision is being made in conversation about the {{ vault_name }} project — an architecture choice, a tradeoff, a policy, a "let's go with X" moment — and file it as a decision page before the context is lost. Triggers include:
+  Notice explicit owner decisions about the {{ vault_name }} project and offer to record them with their source and scope. Triggers include:
   {%+ for ex in trigger_examples['capture-decision'] %}"{{ ex }}"{% if not loop.last %}, {% endif %}{% endfor %}.
 ---
 
 # capture-decision
 
-Decisions are the most valuable and the most quickly forgotten artifact in any project. **Use this skill proactively** — do not wait to be asked. The moment a decision surfaces in conversation, capture it.
+Decisions are easy to lose. Notice them proactively, then verify **whose decision** it is before recording one. A source's recommendation, an agent proposal, or silence after a question is not an owner decision.
 
 ## When to fire (without being asked)
 
 Look for any of these signals:
 
 - Explicit conclusion: "let's go with X", "we'll do Y", "decided", "going with the second option".
-- Implicit conclusion: the user weighed options and is now describing what they'll build as if it's settled.
+- Likely conclusion: the user weighed options and now describes one as settled. Ask whether it is a decision if the wording leaves room for doubt.
 - Course correction: a user direction that changes a previously chosen approach.
 - Tradeoff acknowledged: "yeah, X is slower but Y has the failure mode we can't accept".
 - Reversal: "scratch that, we're not doing X anymore".
@@ -23,7 +23,7 @@ If you see any of these and the conclusion isn't already in `vault/decisions/`, 
 
 ## Workflow
 
-1. **Interrupt briefly.** One line, no derail: *"I'm going to capture this as a decision page — sound right?"* If the user says no, drop it. If they say yes (or nothing within the same turn and the decision is clear), proceed.
+1. **Verify authority.** Quote or paraphrase the owner's explicit choice and show a proposed slug and one-line summary. An explicit request to record it is authorization. Otherwise ask whether to capture it and wait for an affirmative answer. Silence is never confirmation. If the source is an article, meeting note, or assistant suggestion, attribute it as a source claim or proposal until the owner adopts it.
 
 2. **Draft the page in memory** before writing anything. Required sections:
    - **Decision** — one sentence stating what was chosen. Plain English, no hedging.
@@ -31,9 +31,10 @@ If you see any of these and the conclusion isn't already in `vault/decisions/`, 
    - **Options considered** — bullet list. For each rejected option, one line on *why* it was rejected.
    - **Tradeoffs accepted** — what we gave up by choosing this. Be honest; this is the section future-you will thank present-you for.
    - **Reversibility** — easy to back out / hard / one-way. Helps the next person judge how much to argue.
-   - **Source** — link to the conversation, PR, ticket, or "verbal, {{ created_at }} session" if it was pure chat.
+   - **Source and authority** — link to the conversation, change, or Raw record if available; identify the owner statement and date. If no durable record exists, say `owner statement in live conversation; no Raw record` rather than inventing a citation.
+   - **Scope and status** — where this choice applies, effective date if known, and whether it is current, provisional, or superseded.
 
-3. **Choose a slug.** Format: `vault/decisions/<short-kebab-summary>.md`. The slug should be a noun phrase that describes the decision itself ("payment-retry-policy", "drop-redis-cache"), not the discussion ("retry-discussion-with-bob"). Show the slug to the user before writing.
+3. **Choose a slug.** Format: `vault/decisions/<short-kebab-summary>.md`. The slug should describe the decision itself ("payment-retry-policy", "drop-redis-cache"), not the discussion. If this vault has no `decisions` category, ask to add it or choose an existing authorized category before writing.
 
 4. **Check for supersession.** Scan `vault/decisions/` (via `vault/index.md`) for any prior decision this one overrides. If found, edit the prior decision: add a "Superseded by" line at the top linking forward, and leave the original body intact (decisions are history, not state).
 
@@ -49,4 +50,4 @@ If you see any of these and the conclusion isn't already in `vault/decisions/`, 
 
 - **Overcapture.** Not every preference is a decision. "Let's use 2-space indent" is a convention, not a decision. Decisions involve tradeoffs the user could imagine regretting.
 - **Premature capture.** If the user is still actively weighing options, wait. Capture when there's a conclusion, not while there's a debate.
-- **Silent capture.** Always show the slug and a one-line summary of what you're about to file. Never write a decision page without confirmation.
+- **Silent capture.** Always show the slug and a one-line summary. Never treat a missing reply as confirmation.

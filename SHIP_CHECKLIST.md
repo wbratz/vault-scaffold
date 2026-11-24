@@ -53,7 +53,7 @@ Run through this before tagging a public release. Items are grouped roughly by *
 - [ ] `.gitignore` excludes `dist/`, `__pycache__/`, `.pytest_cache/`, `.venv/`, `.env`.
 - [ ] No secrets, tokens, or personal data in any file or git history.
 - [ ] Repo description on the hosting platform (GitHub etc.) matches the README opening paragraph.
-- [ ] Tag the release commit: `git tag -a v0.1.1 -m "vault-scaffold v0.1.1"`.
+- [ ] Tag the release commit when 0.2.0 is ready: `git tag -a v0.2.0 -m "vault-scaffold v0.2.0"`.
 
 ## Package
 

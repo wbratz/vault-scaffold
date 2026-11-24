@@ -33,7 +33,8 @@ When in doubt, ask the user one line: *"Worth filing this back?"*
    - **H1 title** matching the index entry.
    - **TL;DR** — one paragraph (2-4 sentences). Future-you reads this and decides whether to open the rest.
    - **Body** — the actual content. Use H2 sections for anything longer than ~10 lines.
-   - **Sources** — links into `raw/` for any cited source, plus a one-line provenance note: *"Filed from conversation on {{ created_at }} session."*
+   - **Claim roles and limits** — label source claims, local observations, inferences, proposals, and owner decisions where they matter. State applicability and unresolved uncertainty instead of polishing it away.
+   - **Sources** — links into `raw/` for the claims they support. Read the passages before filing. A conversation date is provenance for the draft, not evidence that an external claim is true; if no durable source exists, mark the page provisional and say what evidence is missing.
    - **Related** — bullet list of links to other pages in this vault that touch the topic. If you can't think of any, note that too — it's a signal of an isolated page that may want more context later.
 
 5. **Write the file.** Path: `vault/<category>/<slug>.md`.

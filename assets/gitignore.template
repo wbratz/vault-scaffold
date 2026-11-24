@@ -7,5 +7,12 @@ __pycache__/
 .env
 .env.local
 
+# Source-derived knowledge and local setup stay on this machine by default.
+# A private backup needs its own explicit review and export workflow.
+raw/
+vault/
+evaluation/cases/
+LOCAL-NOTES.md
+
 ## User-specific
 # Add per-user ignores below (editor scratch files, local notes, etc.).

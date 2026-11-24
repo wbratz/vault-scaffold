@@ -96,12 +96,16 @@ SKILL_TEMPLATES: dict[str, str] = {
     "lint": "skills/lint.skill.template.md",
     "capture-decision": "skills/capture-decision.skill.template.md",
     "file-back": "skills/file-back.skill.template.md",
+    "review-answer": "skills/review-answer.skill.template.md",
 }
 
 # Files the upgrade flow may rewrite. Anything not in this list is left alone.
 UPGRADE_META_FILES: list[tuple[str, str]] = [
     ("CLAUDE.md.template", "CLAUDE.md"),
     ("README.md.template", "README.md"),
+    ("ADOPTION.md.template", "ADOPTION.md"),
+    ("SEMANTIC-LAYER.md.template", "SEMANTIC-LAYER.md"),
+    ("evaluation-README.md.template", "evaluation/README.md"),
     ("gitignore.template", ".gitignore"),
 ]
 for _skill_name, _template_rel in SKILL_TEMPLATES.items():
@@ -354,6 +358,21 @@ def check_target(target: Path, force: bool) -> None:
                 "tree), or with --upgrade to interactively update meta files only.",
                 exit_code=2,
             )
+        if not force:
+            generated_paths = [
+                "CLAUDE.md", "README.md", ".gitignore", "ADOPTION.md",
+                "SEMANTIC-LAYER.md", "LOCAL-NOTES.md", "raw/.gitkeep",
+                "vault/index.md", "vault/log.md", "vault/.scaffold-config.json",
+                "evaluation/README.md",
+                *(f".claude/skills/{name}/SKILL.md" for name in SKILL_TEMPLATES),
+            ]
+            collisions = [rel for rel in generated_paths if (target / rel).exists()]
+            if collisions:
+                raise ScaffoldError(
+                    f"target contains files the scaffold would replace: {', '.join(collisions)}\n"
+                    "Choose another directory or use --force after reviewing the conflicts.",
+                    exit_code=2,
+                )
 
 
 def check_upgrade_target(target: Path) -> None:
@@ -446,7 +465,14 @@ def scaffold(
 
     _write(target / "CLAUDE.md", render_template(env, "CLAUDE.md.template", ctx))
     _write(target / "README.md", render_template(env, "README.md.template", ctx))
+    _write(target / "ADOPTION.md", render_template(env, "ADOPTION.md.template", ctx))
+    _write(target / "SEMANTIC-LAYER.md", render_template(env, "SEMANTIC-LAYER.md.template", ctx))
+    _write(target / "evaluation" / "README.md", render_template(env, "evaluation-README.md.template", ctx))
     _write(target / ".gitignore", render_template(env, "gitignore.template", ctx))
+    if not (target / "LOCAL-NOTES.md").exists():
+        _write(target / "LOCAL-NOTES.md", render_template(env, "local-notes.md.template", ctx))
+    elif verbose:
+        print("  [preserved] LOCAL-NOTES.md")
 
     _gitkeep(target / "raw" / ".gitkeep")
 
@@ -510,6 +536,15 @@ def upgrade(
     env = make_jinja_env()
     updated: list[Path] = []
     summary_lines: list[str] = []
+
+    # Older vaults placed custom notes in CLAUDE.md. Preserve them locally
+    # before offering a new CLAUDE.md that reads this ignored file instead.
+    notes_path = target / "LOCAL-NOTES.md"
+    if not notes_path.exists():
+        notes_content = render_template(env, "local-notes.md.template", ctx)
+        write_text(notes_path, notes_content, dry_run=dry_run, verbose=verbose)
+        updated.append(notes_path)
+        summary_lines.append("created LOCAL-NOTES.md")
 
     print(f"\nUpgrade plan for {target}:")
     for template_rel, rel_out in UPGRADE_META_FILES:
@@ -575,38 +610,22 @@ def upgrade(
 
 def init_git(
     target: Path,
-    scaffold_version: str,
     *,
     dry_run: bool,
     verbose: bool,
 ) -> None:
-    msg = f"vault: initial scaffold via vault-scaffold v{scaffold_version}"
     if dry_run:
-        print(f"  [dry-run] git init {target}")
-        print(f'  [dry-run] git commit -m "{msg}"')
+        print(f"  [dry-run] git init {target} (no files staged or committed)")
         return
     try:
-        if not (target / ".git").is_dir():
+        if not (target / ".git").exists():
             subprocess.run(["git", "init", "-q"], cwd=target, check=True)
             if verbose:
                 print(f"  git init {target}")
-        subprocess.run(["git", "add", "."], cwd=target, check=True)
-        result = subprocess.run(
-            ["git", "commit", "-q", "-m", msg],
-            cwd=target, capture_output=True, text=True,
-        )
-        if result.returncode != 0:
-            sys.stderr.write(
-                "warning: git commit failed (the scaffold was created successfully).\n"
-                f"  git stderr: {result.stderr.strip() or '(empty)'}\n"
-                "  If this is a missing user.name/user.email, set those and run:\n"
-                f'    cd {target} && git commit -m "{msg}"\n'
-            )
-            return
         if verbose:
-            print(f'  git commit -m "{msg}"')
+            print("  no files staged or committed; review content before any Git publication")
     except FileNotFoundError:
-        sys.stderr.write("warning: 'git' not found in PATH; skipping git init/commit\n")
+        sys.stderr.write("warning: 'git' not found in PATH; skipping git init\n")
     except subprocess.CalledProcessError as exc:
         sys.stderr.write(f"warning: git operation failed: {exc}\n")
 
@@ -628,8 +647,8 @@ def print_summary(target: Path, ctx: dict[str, Any], files: list[Path], *, dry_r
     print()
     print("Next steps:")
     print(f"  cd {target}")
-    print("  cat CLAUDE.md                 # read the schema")
-    print('  # then in Claude: "ingest <path-or-url>" to add your first source')
+    print("  cat ADOPTION.md               # start with one domain and a real question")
+    print('  # then in Claude: "ingest <allowed-path-or-url>"')
 
 
 # ---------------------------------------------------------------------------
@@ -656,7 +675,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--dry-run", action="store_true",
                    help="Print actions without writing.")
     p.add_argument("--no-git", action="store_true",
-                   help="Skip git init / initial commit (fresh scaffold only).")
+                   help="Skip local git init (fresh scaffold only; nothing is committed by default).")
     p.add_argument("--verbose", action="store_true",
                    help="Print every file written.")
     args = p.parse_args(argv)
@@ -771,7 +790,6 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_git:
             init_git(
                 args.target,
-                config["scaffold_version"],
                 dry_run=args.dry_run, verbose=args.verbose,
             )
         elif args.verbose:

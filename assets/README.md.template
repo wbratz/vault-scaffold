@@ -4,9 +4,9 @@ An LLM-maintained knowledge vault for **{{ domain }}** work, scoped to **{{ scop
 
 ## What is this folder?
 
-A persistent, compounding knowledge base of markdown pages. Sources live under `raw/` (immutable). LLM-generated summaries, decisions, concept pages, and runbooks live under `vault/`. The vault is read and maintained primarily by Claude (or another LLM) following the schema in `CLAUDE.md`. Humans curate the sources and ask the questions; the LLM does the summarizing, cross-referencing, and bookkeeping.
+A persistent, compounding knowledge base of Markdown pages. Sources live under `raw/` (immutable after filtering). Cited summaries, decisions, concept pages, and runbooks live under `vault/`. The agent follows `CLAUDE.md`; the owner controls sources, decisions, exclusions, and corrections. A page organizes evidence, while an answer must explain what that evidence means for the question and where it applies.
 
-This is **not** a docs site. It is not meant to be browsed by every team member. Think of it as a notes directory the LLM keeps for itself (and for you, when you need to ask it something).
+Start with [ADOPTION.md](ADOPTION.md): one domain, a few allowed sources, one real question, and one reviewed answer. [SEMANTIC-LAYER.md](SEMANTIC-LAYER.md) is an optional path from consistent terms to richer relationships. A graph service is a later choice driven by questions.
 
 ## Where things live
 
@@ -15,6 +15,10 @@ This is **not** a docs site. It is not meant to be browsed by every team member.
 ├── CLAUDE.md       ← the schema. Read first if you're the LLM.
 ├── README.md       ← this file.
 ├── .gitignore
+├── LOCAL-NOTES.md  ← private operating constraints; ignored by Git.
+├── ADOPTION.md     ← first-domain walkthrough.
+├── SEMANTIC-LAYER.md ← optional semantic modeling guide.
+├── evaluation/     ← answer review guide; real cases stay local.
 ├── raw/            ← source documents. Immutable.
 ├── vault/          ← LLM-curated wiki:
 │   ├── index.md    ← page catalog. Read first if you're answering a question.
@@ -25,7 +29,7 @@ This is **not** a docs site. It is not meant to be browsed by every team member.
 
 ## How Claude uses it
 
-On any substantive question, Claude reads `vault/index.md` first, then drills into the specific pages it points to. If the answer requires new synthesis, Claude proposes filing it back as a new page (see `.claude/skills/file-back/`). When a new source comes in, Claude runs `ingest`. Periodically, `lint` catches contradictions and orphans. When a decision surfaces in conversation, `capture-decision` fires proactively.
+On a substantive question, the agent uses the index to find relevant pages, checks the Raw support for central source-dependent claims, and serves a focused answer with scope and uncertainty. `ingest` adds allowed sources. `capture-decision` records an explicit owner choice. `review-answer` checks a real answer and keeps the result as a local regression case. `lint` finds structural and selected evidence-quality problems.
 
 The full conventions are in `CLAUDE.md`.
 
@@ -33,10 +37,10 @@ The full conventions are in `CLAUDE.md`.
 
 You have two options:
 
-1. **Tell Claude.** Say "ingest <path-or-url>" or "add this article to the vault". The `ingest` skill walks the 6-step pipeline (read → summarize → file → cross-reference → index → log).
-2. **Drop a file in `raw/` yourself.** Then ask Claude to "summarize the new file in `raw/`". This skips the fetch step.
+1. **Tell Claude.** Say "ingest <path-or-url>" or "add this article to the vault". The `ingest` skill checks access and exclusions, then walks the source-to-page pipeline.
+2. **Place an already filtered file in `raw/`.** Then ask Claude to "summarize this allowed Raw file". The agent checks provenance and skips making a duplicate copy.
 
-Either way, the source ends up in `raw/`, a summary page ends up in `vault/sources/`, the index gets updated, and the log gets an entry.
+Only allowed, filtered source material belongs in `raw/`. The skill is an instruction workflow; it does not provide automatic privacy screening. If material must never reach the model service, do not pass it to this agent.
 
 ## Modifying the schema
 
@@ -47,8 +51,8 @@ Either way, the source ends up in `raw/`, a summary page ends up in `vault/sourc
 - **Change the read order.** Edit the "Read order" section. Be aware that Claude treats it as authoritative.
 - **Change interaction defaults.** Edit the "Ingest mode" section.
 
-Avoid editing pages under `vault/` directly unless you're correcting an LLM error. The skills are designed to make these edits — using them keeps `vault/index.md` and `vault/log.md` in sync.
+Curate pages when the evidence or domain meaning changes. Update the index and log with the page, preserve Raw, and keep owner decisions distinct from proposals. The skills handle the bookkeeping when you use them.
 
-## Provenance
+## Local Git and provenance
 
-Scaffolded by `vault-scaffold` on {{ created_at }}. The original config is preserved at `vault/.scaffold-config.json` for reproducibility.
+Scaffolded by `vault-scaffold` on {{ created_at }}. Git is initialized when available, with **nothing staged or committed**. `raw/`, `vault/`, local notes, and real evaluation cases are ignored by default. The config snapshot at `vault/.scaffold-config.json` stays local for upgrades. If this directory already had tracked knowledge, `.gitignore` will not untrack it; inspect `git ls-files` before connecting or pushing a remote. Model access and publication are separate choices. Export only after a deliberate review of the exact files and destination.

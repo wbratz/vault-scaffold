@@ -1,0 +1,46 @@
+# Build a useful {{ vault_name }} Vault
+
+Start with a question you expect to ask again. A folder full of summaries is easy to create; a system that returns a supported answer with the right context takes one deliberate loop.
+
+## One-domain first run
+
+1. **Choose one bounded domain.** Name a recurring question, its intended reader or agent, and a source owner. For example: “When should this service retry a failed request, and why?” Avoid mapping an entire organization on day one.
+2. **Choose a small source set.** Begin with two or three authoritative documents or work records, plus one conflicting or outdated item if available. Check exclusions, secrets, and permission for model access before ingest. `raw/` is an evidence store, not a dumping ground.
+3. **Ingest and orient.** Run `ingest` for each allowed source. Inspect the Raw copy, source summary, links in `vault/index.md`, and the distinction between what the source asserts and what the Vault infers. Correct a bad summary while the source is fresh.
+4. **Ask the real question.** Run `query`. Read the focused answer and the Raw passage behind its central claim. Check whether it explains the relevant rule or relationship, its scope, and any conflict. The page being retrieved is only the start of this test.
+5. **Review the answer.** Run `review-answer` against that question. Record the expected distinction, supporting Raw passages, a known wrong answer, and the observed miss or success in `evaluation/cases/`. Fix the source page, vocabulary, or retrieval path that caused a miss, then ask again. A correct-looking answer with a weak citation still needs correction.
+6. **Grow only where questions pull.** Add a concept definition, alias, or typed relationship when it resolves a real ambiguity. Use [SEMANTIC-LAYER.md](SEMANTIC-LAYER.md) to decide when taxonomy, ontology, or a graph projection earns its cost.
+
+## What the loop produces
+
+`allowed source → immutable Raw → cited page → focused context → answer → evidence review → correction`
+
+The Raw file records evidence. The page organizes it into information. A reusable answer explains what the evidence means for this question, under what conditions, and why. That distinction is the quality bar; no pipeline stage automatically turns a citation into knowledge.
+
+For an agent about to do work, serve a compact **context card** instead of a page dump:
+
+```md
+Question or task: <what the agent is trying to decide>
+Current terms: <definitions and aliases that change interpretation>
+Applicable decision or rule: <owner decision or documented source rule, with date>
+Evidence: <specific page and Raw passages>
+Boundary: <where the rule applies, conflicts, and unknowns>
+Next action: <what the agent can do or must verify>
+```
+
+The card is assembled for the current task. Its cited pages and Raw remain the durable record; the card can be regenerated when evidence or decisions change.
+
+## A small worked example
+
+Suppose an approved design document says a client retries *timeouts* twice for idempotent requests, while an older runbook says “retry every failure.” A useful answer says which failures qualify, why idempotency matters, which document is current, and where the older advice conflicts. “The system retries twice” loses the condition and could cause the wrong implementation. A review case should mark that shorter answer as a known wrong answer even if it cites the newer document.
+
+This example is illustrative. Put your own source passage and expected answer in a local evaluation case before claiming the Vault works for your domain.
+
+## When to widen the system
+
+- Add a second domain after the first has repeat questions and a correction path.
+- Add an automated retrieval index when navigating pages becomes the bottleneck; preserve the Markdown and Raw evidence as the readable source of truth.
+- Add context-serving integrations when an agent repeatedly needs the same bounded packet of definitions, decisions, and supporting passages.
+- Add formal ontology constraints or a graph service when specific questions require them and you can test the answers before and after.
+
+Keep the first useful loop small enough to inspect by hand. The [answer review contract](evaluation/README.md) makes progress measurable without pretending that a top search hit or a valid link proves correctness.

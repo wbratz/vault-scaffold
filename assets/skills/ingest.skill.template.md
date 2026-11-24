@@ -23,21 +23,21 @@ If the user says "step by step" or "just do it", override the default for this i
 
 ## Workflow
 
-0. **Check operational constraints.** Re-read the "Operational notes" section of `CLAUDE.md`. If the user has marked any paths, sources, or topics as out-of-scope (e.g., "treat `services/legacy/` as out-of-scope") and the candidate source matches, **abort immediately** with a one-line explanation of which note applied. Do not proceed to step 1.
+0. **Gate the source.** Read `CLAUDE.md` and `LOCAL-NOTES.md`. Check source exclusions, secrets, and whether this agent/model may process the material before fetching, pasting, or writing Raw. If access is unclear or a restriction applies, stop. This starter has no automated privacy scanner; an agent's ability to read a file is not publication consent.
 
-1. **Identify the source.** Resolve what was given (file path, URL, paste, drag-and-drop). Confirm the kind: article, RFC, PR, Slack thread, transcript, etc. If the source is a URL, fetch it; if it's a paste, write it to `raw/<slug>.md` verbatim.
+1. **Identify the source.** Resolve what was given (file path, URL, paste, or an already filtered file in `raw/`). Confirm its kind and provenance: article, design document, change discussion, transcript, etc. Fetch or paste only after step 0. If the source already lives in `raw/`, check its allowed status and proceed to summarizing without duplicating it.
 
-2. **Store the raw copy.** Save under `raw/<source-slug>.<ext>` using a stable lower-kebab-case slug derived from the title. Never overwrite an existing `raw/` file — if a collision happens, suffix with `-2`, `-3`, etc., and flag the duplicate to the user.
+2. **Store the allowed Raw copy.** Apply exclusions and secret removal first. Save under `raw/<source-slug>.<ext>` using a stable lower-kebab-case slug derived from the title. Preserve source type, date, creator, and access limits in a short header when known. Never overwrite an existing `raw/` file — if a collision happens, suffix with `-2`, `-3`, etc., and flag the duplicate to the user.
 
 3. **Draft the summary page.** Write `vault/sources/<source-slug>.md` (the `sources` category is required by the schema for exactly this reason) with this skeleton:
    - H1 matching the source title.
    - One-paragraph TL;DR (2-4 sentences).
-   - **Key claims** — bullet list of the factual claims worth remembering.
+   - **Key claims** — each important assertion with its role (`source claim`, `local observation`, `inference`, or `proposal`), supporting Raw passage, and material scope. Attribute an author's recommendation to that author; do not record it as an owner decision.
    - **Open questions** — anything the source raises but doesn't answer.
    - **Cited by** — empty for now; future pages that link here will add themselves.
    - **Source** — relative link back to the `raw/` copy (`../../raw/<source-slug>.<ext>`).
 
-4. **Walk for related pages.** Read `vault/index.md` and identify pages in any category that overlap with the new source's topics. For each, add a cross-reference into the new summary, and add a back-reference from the existing page into the new summary's "Cited by" section. If the source contradicts or extends an existing page, add an inline note on that page pointing to the new source.
+4. **Walk for related pages.** Read `vault/index.md` and identify overlapping pages. Add useful cross-references. If the source contradicts or extends an existing page, record the conflict and source beside the relevant claim; do not silently replace an owner decision or an opinion page. Propose an edit when that page's authority is unclear.
 
 5. **Update `vault/index.md`.** Add an entry under the `sources` section (and any other category whose pages this ingest spawned or modified). Entry format: `- [Title](sources/<slug>.md) — one-line summary`.
 
@@ -45,6 +45,7 @@ If the user says "step by step" or "just do it", override the default for this i
 
 ## Failure modes to watch for
 
-- Source already in `raw/` — abort and ask the user whether to re-ingest or skip.
+- Source already in `raw/` — verify that it is an allowed, filtered copy and summarize it without making a duplicate. If its status is unclear, stop and ask before reading further.
 - Source is enormous (> ~50k tokens) — propose chunking and ingesting in passes, one section at a time.
 - Source contradicts an existing decision — don't silently overwrite; flag the conflict and let the user adjudicate, possibly via the `capture-decision` skill.
+- A clean citation accompanies an overbroad summary — compare the *meaning* of each important claim with the supporting Raw passage before filing.

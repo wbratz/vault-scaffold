@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 
 
 # Files / directories that go into the package (paths are relative to ROOT).
@@ -49,11 +49,16 @@ REQUIRED_IN_PACKAGE: list[str] = [
     "scripts/schema.json",
     "references/domain-templates.md",
     "assets/CLAUDE.md.template",
+    "assets/ADOPTION.md.template",
+    "assets/SEMANTIC-LAYER.md.template",
+    "assets/evaluation-README.md.template",
+    "assets/local-notes.md.template",
     "assets/skills/ingest.skill.template.md",
     "assets/skills/query.skill.template.md",
     "assets/skills/lint.skill.template.md",
     "assets/skills/capture-decision.skill.template.md",
     "assets/skills/file-back.skill.template.md",
+    "assets/skills/review-answer.skill.template.md",
 ]
 
 

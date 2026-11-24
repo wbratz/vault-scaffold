@@ -1,10 +1,22 @@
 # vault-scaffold
 
-**An interview-driven agent skill that scaffolds LLM-maintained "vault" knowledge bases.**
+**Turn sources into context an agent can verify and use.**
 
-Based on [Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern: a persistent, markdown-based knowledge directory that an LLM curates, queries, and grows over time. Instead of re-deriving answers from raw sources on every query (RAG-style), the vault is a compounding artifact where summaries, decisions, entity pages, and syntheses accumulate.
+`vault-scaffold` is an interview-driven skill for creating an LLM-maintained knowledge base and the habits that make its answers dependable.
 
-`vault-scaffold` runs a short interview (~7 questions), validates the answers, and lays out a ready-to-use vault: schema (`CLAUDE.md`), seed indices, five companion skills (`ingest`, `query`, `lint`, `capture-decision`, `file-back`), and an initial git commit. Six built-in domain templates (engineering, product, research, personal, team, mixed) customize the vault's vocabulary and rules.
+Based on [Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern: a persistent Markdown knowledge directory that an LLM curates, queries, and grows over time. The starter now asks the agent to check evidence, serve bounded context, review real answers, and improve the pages or vocabulary that caused a miss.
+
+`vault-scaffold` runs a short interview (~7 questions), validates the answers, and lays out a ready-to-use vault: schema (`CLAUDE.md`), Raw evidence and cited pages, a first-domain walkthrough, an answer review protocol, an optional semantic-layer guide, and six companion skills (`ingest`, `query`, `lint`, `capture-decision`, `file-back`, `review-answer`). Six domain templates (engineering, product, research, personal, team, mixed) customize the vault's vocabulary and rules. Git is initialized locally when available, with no automatic staging or commit.
+
+## The first useful loop
+
+`allowed source → immutable Raw → cited page → focused context → answer → evidence review → correction`
+
+Start with one domain, a few approved sources, and a question you will really ask. The generated `ADOPTION.md` walks through the loop; `evaluation/README.md` gives each question an expected distinction, supporting passages, scope, and a plausible wrong answer. The agent checks whether its answer preserved those conditions. Finding a page or producing a valid citation is only a partial result.
+
+The optional `SEMANTIC-LAYER.md` starts with stable terms and aliases, then adds relationships when real questions need them. Taxonomy, formal ontology, and a derived graph have explicit adoption gates. No graph database or automated entailment claim is bundled with the starter.
+
+Source-derived files, local operating notes, and evaluation cases are ignored by Git by default. The scaffold has no automatic privacy scanner: check exclusions and model access before ingest, and review the exact files before any remote export.
 
 ---
 
@@ -49,7 +61,7 @@ Update later with `git -C <path> pull`.
 Build one with `python scripts/package.py` (output lands in `dist/`), or download a release. The `.skill` file is just a zip:
 
 ```bash
-unzip vault-scaffold-v0.1.1.skill -d ~/.claude/skills/
+unzip vault-scaffold-v0.2.0.skill -d ~/.claude/skills/
 # verify SKILL.md ends up one level deep, not nested:
 ls ~/.claude/skills/vault-scaffold/SKILL.md
 ```
@@ -114,10 +126,10 @@ Claude: [runs scripts/scaffold.py, streams output]
           target:     /abs/path/acme-payments
           domain:     engineering
           ...
-          files:      17
+          files:      24
 ```
 
-After scaffolding, open Claude Code in the new vault directory and ask it anything. It reads `vault/index.md` first per the schema, drills into relevant pages, and proposes filing your synthesis back when worthwhile.
+After scaffolding, open `ADOPTION.md` in the new vault. Ingest one allowed source, ask a real question, and use `review-answer` to inspect the answer against Raw. The index routes the agent to pages; it checks the source behind substantive conclusions and proposes filing back reusable synthesis.
 
 ---
 
@@ -140,7 +152,7 @@ After edits, run `python scripts/package.py` to rebuild the `.skill` (it runs th
 python scripts/scaffold.py --upgrade --target /path/to/existing/vault
 ```
 
-`--upgrade` re-renders the *meta* files (`CLAUDE.md`, `README.md`, `.gitignore`, the five `.claude/skills/*/SKILL.md`) against current templates and shows a per-file diff. Confirm or reject each change. **User content under `vault/<category>/`, `raw/`, the body of `vault/index.md`, and the body of `vault/log.md` are never touched.** A single entry is appended to `vault/log.md` recording the upgrade.
+`--upgrade` re-renders the *meta* files (`CLAUDE.md`, `README.md`, `ADOPTION.md`, `SEMANTIC-LAYER.md`, `evaluation/README.md`, `.gitignore`, and six `.claude/skills/*/SKILL.md`) against current templates and shows a per-file diff. Confirm or reject each change. **User content under `vault/<category>/`, `raw/`, the body of `vault/index.md`, and the body of `vault/log.md` are never touched.** Older custom notes are copied into ignored `LOCAL-NOTES.md` if it does not exist; an existing local-notes file is never overwritten. A single entry is appended to `vault/log.md` recording the upgrade. After upgrading, inspect tracked files: `.gitignore` does not untrack content already committed.
 
 Add `--yes` to auto-accept all proposed changes (useful in CI or for batch updates).
 
@@ -152,7 +164,6 @@ Semantic versioning. The version is recorded in:
 
 - `scripts/package.py` (`VERSION`)
 - Every scaffolded vault's `vault/.scaffold-config.json` (under `scaffold_version`)
-- The initial git commit message in the scaffolded vault
 - Filename of the built `.skill` package
 
 **Bump rules:**
@@ -163,7 +174,7 @@ Semantic versioning. The version is recorded in:
 | Schema-breaking changes (renamed/removed config fields, removed domain, renamed category), changes that require an `--upgrade` to be applied | major |
 | Bug fixes, doc-only changes, template content tweaks that don't change rendered shape | patch |
 
-`--upgrade` migrations should always be safe across patches and minors; majors may require manual intervention (the upgrade output makes the diff visible so the user can adjudicate).
+During the `0.x` series, a minor release may also change generation defaults. Version `0.2.0` removes the automatic initial Git commit and adds privacy, evidence, evaluation, and semantic-layer contracts. `--upgrade` migrations show each proposed meta-file change; review them against local edits.
 
 ---
 
@@ -180,6 +191,10 @@ vault-scaffold/
 │   └── skill-templates.md            # (stub — for future expansion)
 ├── assets/
 │   ├── CLAUDE.md.template            # generated vault's schema
+│   ├── ADOPTION.md.template           # first-domain walkthrough
+│   ├── SEMANTIC-LAYER.md.template     # optional modeling guide
+│   ├── evaluation-README.md.template # answer review contract
+│   ├── local-notes.md.template        # ignored local constraints
 │   ├── README.md.template            # generated vault's human entry point
 │   ├── index.md.template
 │   ├── log.md.template
@@ -189,7 +204,8 @@ vault-scaffold/
 │       ├── query.skill.template.md
 │       ├── lint.skill.template.md
 │       ├── capture-decision.skill.template.md
-│       └── file-back.skill.template.md
+│       ├── file-back.skill.template.md
+│       └── review-answer.skill.template.md
 ├── scripts/
 │   ├── scaffold.py                   # validates config, renders templates, scaffolds, or upgrades
 │   ├── package.py                    # tests + builds dist/*.skill

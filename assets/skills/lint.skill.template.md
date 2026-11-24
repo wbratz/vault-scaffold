@@ -19,6 +19,8 @@ Periodic health check across the **{{ vault_name }}** vault. Run weekly, after a
 
 3. **Check raw citations.** For each page, parse links into `raw/`. Missing files → **broken source citations**. Bonus: if a page cites a `raw/` file that has no corresponding summary in `vault/sources/`, flag it as **un-summarized source**.
 
+   For a small sample of high-impact claims, open the cited passages and ask whether they support the *meaning*, attribution, and scope of the claims. Report this as a review finding, never as an automated entailment verdict. Flag a proposal described as an owner decision.
+
 4. **Scan for contradictions.** When two pages make claims about the same entity, decision, or concept, surface the conflict. Heuristic: pages that mention the same proper noun or decision title and contain words like "always", "never", "must", "should not" deserve a closer look. Don't try to be exhaustive — surface the candidates and let the user adjudicate.
 
 5. **Scan for stale claims.** A page is potentially stale if any of these are true: its `updated` frontmatter (when present) predates a source it cites; a source it cites has a newer version in `raw/`; the page hasn't been touched in over 6 months and lives in a fast-moving category (e.g., `runbooks`, `decisions`).
@@ -26,6 +28,8 @@ Periodic health check across the **{{ vault_name }}** vault. Run weekly, after a
 6. **Find missing cross-references.** Identify the top ~10 entities or concepts mentioned across many pages. For each, flag pages that mention the term but don't link to its canonical page.
 
 7. **Find data gaps.** Two signals: (a) categories with very few pages relative to the others; (b) recurring queries in `vault/log.md` that don't map to any page. Both suggest the vault should grow in that direction.
+
+   Read `evaluation/cases/` when it exists. Treat repeated answer misses as stronger evidence of a gap than category size alone. Check that any changed page has not broken a previously passing distinction.
 
 8. **Produce a report.** Group findings by severity:
    - **Broken** — broken links, broken index entries, missing files. Fix immediately.
