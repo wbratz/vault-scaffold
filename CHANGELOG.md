@@ -8,6 +8,13 @@ Iteration markers in parentheses refer to the development session that produced 
 
 ## [Unreleased]
 
+### Changed for 0.2.0
+
+- Generated vaults now keep source-derived files, local operating notes, config snapshots, and real answer cases ignored by Git. Git initialization stages and commits nothing, including when the target already contains unrelated files. Fresh scaffolds refuse generated-name collisions unless explicitly forced.
+- Query, ingest, file-back, lint, and decision-capture instructions now distinguish source claims, inference, proposals, and owner decisions; substantive answers check cited Raw for meaning, scope, and uncertainty.
+- Added `review-answer`, an answer review protocol, a first-domain adoption walkthrough, and an optional vocabulary-to-graph guide. These are manual, evidence-linked workflows; they do not claim automated entailment or a graph service.
+- Upgrades preserve existing `LOCAL-NOTES.md` and create it from the saved config when missing. New instructional files join the per-file diff review.
+
 ### Fixed
 
 - README install section corrected. `claude skills install <pkg>.skill` is not a real Claude Code CLI subcommand. Direct clone and `.skill` extraction remain supported; marketplace installation is documented in the 0.1.1 release notes.

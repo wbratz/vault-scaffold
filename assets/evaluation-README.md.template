@@ -1,0 +1,40 @@
+# Answer review
+
+Review a Vault answer against the **question and its source evidence**, not just whether a page was retrieved. Store real cases under `evaluation/cases/`; that folder is ignored by Git because questions and source excerpts may be private.
+
+## Case template
+
+Create one Markdown file per recurring or missed question:
+
+```md
+# <question in the user's words>
+
+Status: draft | reviewed
+Expected distinction: <the relationship, condition, or decision rule a good answer must explain>
+Supporting Raw: <paths and exact passage locations>
+Source type and authority: <owner decision, specification, transcript, opinion, etc.>
+Scope and uncertainty: <date, version, exceptions, unresolved conflict>
+Known wrong answer: <a plausible answer that loses a crucial condition>
+
+## Observed answer
+<answer, date, agent/context version>
+
+## Review
+Retrieval: pass | miss | partial
+Claim support: pass | miss | partial
+Meaning and relationships: pass | miss | partial
+Scope and uncertainty: pass | miss | partial
+Citation accuracy: pass | miss | partial
+Correction: <page, link, vocabulary, prompt, or source gap to fix>
+```
+
+Read the cited Raw before marking claim support or citation accuracy. A valid path or exact quote can still support a different claim. If the Raw is unavailable, mark support **unverified**, not pass. Keep retrieval and answer quality separate: finding the intended page does not prove the answer is sound.
+
+## Feedback loop
+
+1. Run `review-answer` on a real answer. Save the case locally.
+2. Locate the cause of a miss: missing source, weak synthesis, ambiguous terms, poor routing, or an answer that overstates the evidence.
+3. Change the smallest authorized artifact. Preserve Raw; flag conflicting or owner-controlled pages for review.
+4. Re-ask the same question and compare the new answer to the recorded expected distinction and known wrong answer. Keep prior cases as a regression set.
+
+This is a human-readable evaluation protocol. It does not claim automated entailment checking or a general quality score. Start with a handful of real questions before adding measurement tooling.

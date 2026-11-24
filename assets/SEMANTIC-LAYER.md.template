@@ -1,0 +1,40 @@
+# An optional semantic layer
+
+Use this when repeated questions expose ambiguous names, conflicting definitions, or relationships that prose search misses. This is a progression of modeling work, not a required installation sequence or a promise that a graph database improves every answer.
+
+## Start with a controlled vocabulary
+
+Pick five to ten terms from one domain. For each concept, record a stable ID, preferred label, aliases, plain-language definition, owner, scope, status, and source passage. Keep aliases for the *same* concept separate from links to *different* concepts.
+
+```md
+ID: retry-eligible-request
+Preferred label: retry-eligible request
+Aliases: safe-to-retry request
+Definition: A request for which this system's documented retry rule applies.
+Scope: <service/version/date or other boundary>
+Source: <relative link to the supporting Raw passage>
+Status: proposed | reviewed
+```
+
+The example is a shape, not an assertion about any actual service. Put reviewed concept pages in your existing `vault/<category>/` structure and link them from `vault/index.md`.
+
+## Add only relationships you can explain
+
+- **Same concept:** an alternate label resolves to one ID. Do not duplicate the entity because wording differs.
+- **Broader/narrower:** one concept includes another under a stated rule. Test an example that belongs and one that does not.
+- **Related:** two distinct concepts have a named, useful relationship. Record why that link helps a question.
+- **Claim about a concept:** attach source, claim role, date, and scope. A source's recommendation may also be a proposal; it is not automatically an owner decision.
+
+Review each relationship against a real question and a Raw passage. If the relationship is disputed, record the competing interpretations instead of making a clean but false edge.
+
+## Decide when to advance
+
+| Add | When it earns its place | Evidence of value |
+| --- | --- | --- |
+| Metadata rules | Sources or claims are hard to filter by owner, date, status, or scope. | A question reaches the right evidence more reliably. |
+| Taxonomy | Users repeatedly need broader/narrower navigation. | The hierarchy distinguishes cases without burying exceptions. |
+| Thesaurus links | Synonyms and related terms cause missed retrieval. | Before/after questions show fewer misses without merging distinct concepts. |
+| Ontology constraints | A domain rule must be checked consistently across many records. | Counterexamples are rejected for the right reason. |
+| Derived graph | Questions require traversing several typed relationships. | The graph answers those questions with provenance and a correction path back to source pages. |
+
+Markdown pages and Raw passages remain readable, reviewable records. A graph or search index can be derived from them. Choose a dedicated graph service only after a real query demonstrates the need; keep the answer review cases so the extra machinery can be judged on its results.

@@ -10,9 +10,10 @@ Bootstrapped {{ created_at }} by `vault-scaffold`.
 
 On **any substantive question** about this project — anything that involves prior decisions, conventions, entities, or accumulated context — your first action is:
 
-1. Read `vault/index.md` (the catalog of every page in this vault).
-2. Read the specific pages the index points you to (under `vault/<category>/`).
-3. Only fall back to grepping `raw/` or the surrounding repo when the vault is silent.
+1. Read `vault/index.md`, then search its entries and the vault for the question's concepts, source names, and likely synonyms.
+2. Read the relevant pages. Treat the index and search results as routes to evidence, never as answers.
+3. For a source-dependent conclusion, open the cited `raw/` passage and check whether it supports the **meaning** of the claim. If the page is silent, search `raw/` and the surrounding repo before declaring a gap.
+4. Serve a focused answer: the usable conclusion, the relationship or decision rule behind it, linked evidence, and material scope or uncertainty. Separate a source's assertion from your inference and the owner's decision.
 
 {% if domain_default_behavior_rules %}
 Additional rules for **{{ domain }}** vaults:
@@ -22,17 +23,17 @@ Additional rules for **{{ domain }}** vaults:
 {% endfor %}
 
 {% endif %}
-Before performing any **write action** (ingest, file-back, capture-decision), re-read the **Operational notes** section immediately below — it contains user-imposed constraints that override defaults.
+Before performing any **write action** (ingest, file-back, capture-decision, review-answer), read `LOCAL-NOTES.md` if it exists. It contains local constraints that override defaults.
 
 If you answer a substantive question and the answer is *not yet* in the vault, propose filing it back (see the `file-back` skill). The vault is a compounding artifact — every good answer should make the next one cheaper.
 
 ---
 
-## Operational notes
+## Operational notes and privacy
 
-{{ custom_notes if custom_notes else "_(none — the user has not added any operational constraints.)_" }}
+Read `LOCAL-NOTES.md` before ingesting or editing. The user's notes live there rather than in this shareable file. The config snapshot at `vault/.scaffold-config.json`, `raw/`, `vault/`, and evaluation cases are local by default and ignored by Git.
 
-These are user-imposed constraints on how this vault is used. **Honor them on every write.** If a constraint here contradicts a workflow step in a skill, the constraint wins; surface the conflict to the user rather than silently violating either.
+Apply exclusions and remove secrets **before** storing a Raw copy or sending material to a model. If a source may not be processed by this agent or model service, stop and use an authorized local path. This starter supplies instructions, not an automated privacy scanner or consent system. A model's access to a source does not authorize publishing it. Review every proposed export separately. Never push source-derived content to a remote by default.
 
 ---
 
@@ -42,7 +43,7 @@ These are user-imposed constraints on how this vault is used. **Honor them on ev
 2. **`vault/index.md`** — catalog of every page, grouped by category
 3. **`vault/log.md`** — recent ingests, queries, lints, decisions (the last ~20 entries are usually enough)
 4. **`vault/<category>/<page>.md`** — the actual content
-5. **`raw/<source>`** — original source documents, only when a page cites them
+5. **`raw/<source>`** — original source documents, checked when a source-dependent claim needs support
 
 Stop once you have enough context. Reading the whole vault is rarely correct.
 
@@ -55,6 +56,10 @@ Stop once you have enough context. Reading the whole vault is rarely correct.
 ├── CLAUDE.md                  ← this file
 ├── README.md                  ← human-facing entry point
 ├── .gitignore
+├── LOCAL-NOTES.md             ← private operating constraints (ignored by Git)
+├── ADOPTION.md                ← first-domain walkthrough
+├── SEMANTIC-LAYER.md          ← optional vocabulary-to-graph path
+├── evaluation/README.md      ← answer review contract
 ├── raw/                       ← immutable source documents
 │   └── assets/                ← images and binaries referenced by raw/
 ├── vault/                     ← LLM-curated wiki
@@ -67,7 +72,8 @@ Stop once you have enough context. Reading the whole vault is rarely correct.
     ├── query/
     ├── lint/
     ├── capture-decision/
-    └── file-back/
+    ├── file-back/
+    └── review-answer/
 ```
 
 ---
@@ -92,18 +98,22 @@ Note: `vault/sources/` is load-bearing — the `ingest` skill always files sourc
 - **Citations** to source material use relative links into `raw/`: from `vault/<cat>/page.md`, that's `[ACME RFC 7](../../raw/rfc-7.md)`.
 - **Cross-references** between pages use relative links: from one category to another, `[retry policy](../decisions/payment-retry-policy.md)`.
 - **Frontmatter is optional.** When present, use: `created`, `updated`, `sources` (list of `raw/` paths), `related` (list of page paths).
+- **Claim roles are explicit.** Label important statements as `source claim`, `local observation`, `inference`, `proposal`, or `owner decision`. A quotation or citation path alone does not prove an inference.
+- **Knowledge carries conditions.** A reusable explanation states what the terms mean, how they relate, who or what the conclusion applies to, and what could change it. Keep unresolved conflicts visible.
+- **Edit authority matters.** Source summaries may report an author's view. Only an explicit owner choice becomes an owner decision; suggestions remain proposals until adopted.
 
 ---
 
 ## Skills
 
-The vault ships with five skills under `.claude/skills/`:
+The vault ships with six skills under `.claude/skills/`:
 
 - `ingest` — pull a new source into the vault
 - `query` — answer a question using the vault, optionally file the answer back
 - `lint` — periodic health check
 - `capture-decision` — record a decision the moment it surfaces in conversation (fires PROACTIVELY)
 - `file-back` — promote chat content into a vault page
+- `review-answer` — grade a real answer against its evidence and record a correction
 
 See each skill's `SKILL.md` for the full workflow.
 
@@ -113,6 +123,7 @@ Trigger phrases that activate each skill (close paraphrases also work):
 
 {% for skill, examples in trigger_examples.items() %}- **`{{ skill }}`** — {% for ex in examples %}"{{ ex }}"{% if not loop.last %}, {% endif %}{% endfor +%}
 {% endfor %}
+- **`review-answer`** — "review that answer", "grade this vault answer", "what did the retrieval miss?"
 
 ---
 

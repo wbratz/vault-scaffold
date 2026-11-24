@@ -1,0 +1,5 @@
+# Local operating notes
+
+This file stays on this machine by default. Review it before an agent reads or writes source material. Do not place secrets here; this file may be read by an agent and sent to its model service.
+
+{{ custom_notes if custom_notes else "No additional constraints were supplied during setup. Add source exclusions, model-access limits, and edit rules here as needed." }}

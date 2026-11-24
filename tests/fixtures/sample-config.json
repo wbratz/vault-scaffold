@@ -19,5 +19,5 @@
   "ingest_mode": "confirm_plan",
   "custom_notes": "Vault scoped to the acme-payments repo. Treat any file under services/legacy/ as out-of-scope for ingest by default.",
   "created_at": "2026-05-28T12:00:00-04:00",
-  "scaffold_version": "0.1.1"
+  "scaffold_version": "0.2.0"
 }
